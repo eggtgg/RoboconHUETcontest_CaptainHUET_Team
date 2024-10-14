@@ -1,5 +1,3 @@
-#include <EEPROM.h>
-
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
@@ -22,14 +20,9 @@
 #define end_Y 14
 #define end_Z 18
 
-int adr_X1 0;
-int adr_X2 1;
-
-int adr_Y1 2;
-int adr_Y2 3;
-
-int adr_Z1 4;
-int adr_Z2 5;
+int positionX = 0;
+int positionY = 0;
+int positionZ = 0;
 
 int pulsestep = 40;
 int numstep = 3200;
@@ -50,7 +43,7 @@ int motorZ;
 int servo4;
 
 int smode;
-int d_range = 100;
+int d_range = 250;
 
 // create an RF24 object
 RF24 radio(49, 53); // CE, CSN
@@ -144,8 +137,14 @@ void loop() {
   if (potX > 512) smode = 1;
   else smode = 0;
   
-  if (potY > 512) servo4 = 10;
-  else servo4 = 95;
+  if (potY > 512) {
+    servo4 = 10;
+    servo_red.write(servo4);
+  }
+  else {
+    servo4 = 95;
+    servo_red.write(servo4);
+  }
 
   switch (smode) {
     case 0:
@@ -158,35 +157,30 @@ void loop() {
       dieu_chinh_arm();
       
       if (!leftJoySw) {
-        update_to_rom(Step_X.currentPosition(), 0, 1);
-        update_to_rom(Step_Y.currentPosition(), 2, 3);
-        update_to_rom(Step_Z.currentPosition(), 4, 5);
+        positionX = Step_X.currentPosition();
+        Serial.print("set: "); Serial.print(positionX); Serial.println(";");
+        positionY = Step_Y.currentPosition();
+        positionZ = Step_Z.currentPosition();
       }
 
       if (!rightJoySw) {
-        positionX = values_form_rom_back(0, 1);
-        positionY = values_form_rom_back(2, 3);
-        positionZ = values_form_rom_back(4, 5);
-        run(95, positionX, positionY, positionZ);
+        Serial.print("hien tai: "); Serial.print(Step_X.currentPosition()); Serial.println(";");
+        // Serial.print("go to: "); Serial.print(positionX); Serial.println(";");
+        Step_X.setMaxSpeed(v_arm);
+        Step_X.setAcceleration(a_arm);
+
+        Step_Y.setMaxSpeed(v_arm);
+        Step_Y.setAcceleration(a_arm);
+
+        Step_Z.setMaxSpeed(v_arm);
+        Step_Z.setAcceleration(a_arm);
+        run(95, -500, 0, 0);
       }
       break;
   }
   check_arm_and_run_mode();
 }
 
-void update_to_rom(int position, int adr1, int adr2) {
-  int adr1_value = position / 100;
-  int adr2_value = position % 100;
-  EEPROM.update(adr1, adr1_value);
-  delay(5);
-  EEPROM.update(adr2, adr2_value);
-  delay(5);
-}
-
-int values_form_rom_back(int adr1, int adr2) {
-  int position = EEPROM.read(adr1) * 100 + EEPROM.read(adr2)
-  return position
-}
 
 void radio_check() {
   // Read the data if available in buffer
@@ -202,6 +196,7 @@ void radio_check() {
 
     potX = control[6];
     potY = control[7];
+    // Serial.print("hello");Serial.println(potY);
     potZ = control[1];
 
     // Serial.print(leftJoyX);
@@ -241,13 +236,14 @@ void run(byte Ser, int X, int Y, int Z) {
   Step_X.moveTo(X);
   Step_Y.moveTo(Y);
   Step_Z.moveTo(Z);
+  
+  Step_X.setSpeed(-500);
+  Step_Y.setSpeed(500);
+  Step_Z.setSpeed(500);
 
-  while (Step_X.distanceToGo() != 0 or Step_Y.distanceToGo() != 0 or Step_Z.distanceToGo() != 0)
-  {
-    Step_X.run();
-    Step_Y.run();
-    Step_Z.run();
-  }
+  Step_X.runSpeedToPosition();
+  Step_Y.runSpeedToPosition();
+  Step_Z.runSpeedToPosition();
   // servo_red.write(Ser);
 }
 
@@ -337,9 +333,6 @@ void dieu_chinh_arm() {
     Step_Y.setSpeed(500);
     Step_Y.runSpeed();
   }
-  else {
-    Step_Y.stop();
-  }
 
   // MOTOR Z
   if ((leftJoyY - leftJoyX > 0 + d_range) & (leftJoyY + leftJoyX > 1023 + d_range)) {
@@ -350,8 +343,33 @@ void dieu_chinh_arm() {
     Step_Z.setSpeed(500);
     Step_Z.runSpeed();
   }
-  else {
-    Step_Z.stop();
+
+  if (leftJoyY + leftJoyX < 1023 + d_range){
+    if (leftJoyY + leftJoyX > 1023 - d_range) {
+      // phai xuong - ra xuong
+      if (leftJoyY - leftJoyX < 0 - d_range) {
+        Step_Y.setSpeed(-500);
+        Step_Y.runSpeed();
+
+        Step_Z.setSpeed(500);
+        Step_Z.runSpeed();
+        Serial.println("phai xuong-  ra xuong");
+      }
+      // trai len - vao len
+      if (leftJoyY - leftJoyX > 0 + d_range) {
+        Step_Y.setSpeed(500);
+        Step_Y.runSpeed();
+
+        Step_Z.setSpeed(-500); 
+        Step_Z.runSpeed();
+        Serial.println("trai len-  vao len");
+      }
+    }
+  }
+  if ((leftJoyY + leftJoyX > 1023 + d_range) & (leftJoyY + leftJoyX < 1023 - d_range)
+    & (leftJoyY - leftJoyX > 0 - d_range) & (leftJoyY - leftJoyX < 0 + d_range)) {
+      Step_Y.stop();
+      Step_Z.stop();
   }
 }
 
