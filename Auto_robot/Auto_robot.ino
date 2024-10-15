@@ -54,6 +54,18 @@ float v2 = 0;
  
 void setup()                         
 {
+  pinMode(Trig1,OUTPUT);
+  pinMode(Echo1,INPUT);
+
+  pinMode(Trig2,OUTPUT);
+  pinMode(Echo2,INPUT);
+
+  pinMode(Trig3,OUTPUT);
+  pinMode(Echo3,INPUT);
+
+  pinMode(Dig,INPUT_PULLUP);
+  pinMode(Ana,INPUT);
+  
   pinMode(MOTOR_A1_PIN, OUTPUT);
   pinMode(MOTOR_B1_PIN, OUTPUT);
 
@@ -62,12 +74,6 @@ void setup()
 
   pinMode(PWM_MOTOR_1, OUTPUT);
   pinMode(PWM_MOTOR_2, OUTPUT);
-
-//  pinMode(CURRENT_SEN_1, OUTPUT);
-//  pinMode(CURRENT_SEN_2, OUTPUT);  
-//
-//  pinMode(EN_PIN_1, OUTPUT);
-//  pinMode(EN_PIN_2, OUTPUT);
 
 pinMode(EncoderA1,INPUT_PULLUP);
 pinMode(EncoderA2,INPUT_PULLUP);
@@ -135,7 +141,7 @@ void loop()
 // delay(1000);
 // Stop();
 // delay(1000);
-Reverse();
+//Reverse();
 // delay(1000);
 // Stop();
 // delay(1000);
