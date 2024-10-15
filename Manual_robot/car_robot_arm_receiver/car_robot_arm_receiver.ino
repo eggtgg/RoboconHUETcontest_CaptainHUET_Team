@@ -43,7 +43,9 @@ int motorZ;
 int servo4;
 
 int smode;
-int d_range = 250;
+
+int d_range_arm = 250;
+int d_range_move = 50;
 
 // create an RF24 object
 RF24 radio(49, 53); // CE, CSN
@@ -313,11 +315,11 @@ void home_one() {
 void dieu_chinh_arm() {
   // MOTOR X
   if (rightJoyX > 723) {
-    Step_X.setSpeed(1500);
+    Step_X.setSpeed(1000);
     Step_X.runSpeed();
   }
   else if (rightJoyX < 300) {
-    Step_X.setSpeed(-1500);
+    Step_X.setSpeed(-1000);
     Step_X.runSpeed();
   }
   else {
@@ -325,29 +327,29 @@ void dieu_chinh_arm() {
   }
 
   // MOTOR Y
-  if ((leftJoyY - leftJoyX < 0 - d_range) & (leftJoyY + leftJoyX > 1023 + d_range)) {
+  if ((leftJoyY - leftJoyX < 0 - d_range_arm) & (leftJoyY + leftJoyX > 1023 + d_range_arm)) {
     Step_Y.setSpeed(-500);
     Step_Y.runSpeed();
   }
-  else if ((leftJoyY - leftJoyX > 0 + d_range) & (leftJoyY + leftJoyX < 1023 - d_range)) {
+  else if ((leftJoyY - leftJoyX > 0 + d_range_arm) & (leftJoyY + leftJoyX < 1023 - d_range_arm)) {
     Step_Y.setSpeed(500);
     Step_Y.runSpeed();
   }
 
   // MOTOR Z
-  if ((leftJoyY - leftJoyX > 0 + d_range) & (leftJoyY + leftJoyX > 1023 + d_range)) {
+  if ((leftJoyY - leftJoyX > 0 + d_range_arm) & (leftJoyY + leftJoyX > 1023 + d_range_arm)) {
     Step_Z.setSpeed(-500);
     Step_Z.runSpeed();
   }
-  else if ((leftJoyY - leftJoyX < 0 - d_range) & (leftJoyY + leftJoyX < 1023 - d_range)) {
+  else if ((leftJoyY - leftJoyX < 0 - d_range_arm) & (leftJoyY + leftJoyX < 1023 - d_range_arm)) {
     Step_Z.setSpeed(500);
     Step_Z.runSpeed();
   }
 
-  if (leftJoyY + leftJoyX < 1023 + d_range){
-    if (leftJoyY + leftJoyX > 1023 - d_range) {
+  if (leftJoyY + leftJoyX < 1023 + d_range_arm){
+    if (leftJoyY + leftJoyX > 1023 - d_range_arm) {
       // phai xuong - ra xuong
-      if (leftJoyY - leftJoyX < 0 - d_range) {
+      if (leftJoyY - leftJoyX < 0 - d_range_arm) {
         Step_Y.setSpeed(-500);
         Step_Y.runSpeed();
 
@@ -356,7 +358,7 @@ void dieu_chinh_arm() {
         Serial.println("phai xuong-  ra xuong");
       }
       // trai len - vao len
-      if (leftJoyY - leftJoyX > 0 + d_range) {
+      if (leftJoyY - leftJoyX > 0 + d_range_arm) {
         Step_Y.setSpeed(500);
         Step_Y.runSpeed();
 
@@ -366,8 +368,8 @@ void dieu_chinh_arm() {
       }
     }
   }
-  if ((leftJoyY + leftJoyX > 1023 + d_range) & (leftJoyY + leftJoyX < 1023 - d_range)
-    & (leftJoyY - leftJoyX > 0 - d_range) & (leftJoyY - leftJoyX < 0 + d_range)) {
+  if ((leftJoyY + leftJoyX > 1023 + d_range_arm) & (leftJoyY + leftJoyX < 1023 - d_range_arm)
+    & (leftJoyY - leftJoyX > 0 - d_range_arm) & (leftJoyY - leftJoyX < 0 + d_range_arm)) {
       Step_Y.stop();
       Step_Z.stop();
   }
@@ -376,16 +378,16 @@ void dieu_chinh_arm() {
 void dichuyen() {
   motor_hold();
   
-  if ((leftJoyY - leftJoyX > 0 + d_range) & (leftJoyY + leftJoyX > 1023 + d_range)) {
+  if ((leftJoyY - leftJoyX > 0 + d_range_move) & (leftJoyY + leftJoyX > 1023 + d_range_move)) {
     motor_tien();
   }
-  if ((leftJoyY - leftJoyX < 0 - d_range) & (leftJoyY + leftJoyX < 1023 - d_range)) {
+  if ((leftJoyY - leftJoyX < 0 - d_range_move) & (leftJoyY + leftJoyX < 1023 - d_range_move)) {
     motor_lui();
   }
-  if ((leftJoyY - leftJoyX < 0 - d_range) & (leftJoyY + leftJoyX > 1023 + d_range)) {
+  if ((leftJoyY - leftJoyX < 0 - d_range_move) & (leftJoyY + leftJoyX > 1023 + d_range_move)) {
     motor_phai();
   }
-  if ((leftJoyY - leftJoyX > 0 + d_range) & (leftJoyY + leftJoyX < 1023 - d_range)) {
+  if ((leftJoyY - leftJoyX > 0 + d_range_move) & (leftJoyY + leftJoyX < 1023 - d_range_move)) {
     motor_trai();
   }
 
@@ -489,7 +491,7 @@ void motor_trai() {
 
 
 void motor_quay_phai() {
-    numstep = map(control[0], 723, 1023, 0, 300);
+    numstep = map(control[0], 600, 1023, 0, 200);
     digitalWrite(enPin, LOW);
     digitalWrite(dirPin1, LOW);
     digitalWrite(dirPin2, LOW);
@@ -506,7 +508,7 @@ void motor_quay_phai() {
 
 
 void motor_quay_trai() {
-    numstep = map(control[0], 300, 0, 0, 300);
+    numstep = map(control[0], 400, 0, 0, 200);
     digitalWrite(enPin, LOW);
     digitalWrite(dirPin1, HIGH);
     digitalWrite(dirPin2, HIGH);
