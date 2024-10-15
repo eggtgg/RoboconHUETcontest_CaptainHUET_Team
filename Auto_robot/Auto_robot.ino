@@ -1,5 +1,4 @@
 #include <TimerOne.h>
-
 #define EncoderA1 2
 #define EncoderA2 3
 
@@ -7,6 +6,22 @@
 #define CW    1
 #define CCW   2
 //#define CS_THRESHOLD 15   // Definition of safety current (Check: "1.3 Monster Shield Example").
+
+//HC1
+#define Trig1 A0
+#define Echo1 A1
+
+//HC2
+#define Trig2 8
+#define Echo2 9
+
+//HC3
+#define Dig 13
+#define Ana A7
+
+//HC3
+#define Trig3 11
+#define Echo3 12
 
 //MOTOR 1
 #define MOTOR_A1_PIN A3
@@ -28,10 +43,7 @@
 #define MOTOR_1 0
 #define MOTOR_2 1
 
-const int trig = 8;     // chân trig của HC-SR04
-const int echo = 9;     // chân echo của HC-SR04
-
-short usSpeed1 = 225;  //default motor speed
+short usSpeed1 = 255;  //default motor speed
 short usSpeed2 = 255;  //default motor speed
 unsigned short usMotor_Status = BRAKE;
 
@@ -40,11 +52,8 @@ float v1 = 0;
 int xung2 = 0;
 float v2 = 0;
  
-void setup() {
-
-  pinMode(trig,OUTPUT);   // chân trig sẽ phát tín hiệu
-  pinMode(echo,INPUT);    // chân echo sẽ nhận tín hiệu
-
+void setup()                         
+{
   pinMode(MOTOR_A1_PIN, OUTPUT);
   pinMode(MOTOR_B1_PIN, OUTPUT);
 
@@ -67,7 +76,7 @@ attachInterrupt (0, ngat_dem_xung2, FALLING);
 Timer1.initialize(1000000);
 Timer1.attachInterrupt(ngat_timer1);
 
-  Serial.begin(9600);     // Initiates the serial to do the monitoring 
+  Serial.begin(115200);              // Initiates the serial to do the monitoring 
   Serial.println(); //Print function list for user selection
   Serial.println("Enter number for control option:");
   Serial.println("1. STOP");
@@ -83,39 +92,69 @@ Timer1.attachInterrupt(ngat_timer1);
 void loop() 
 {
   char user_input;   
-  while(Serial.available()){
+  while(Serial.available())
+  {
     user_input = Serial.read(); //Read user input and trigger appropriate function
 //    digitalWrite(EN_PIN_1, HIGH);
 //    digitalWrite(EN_PIN_2, HIGH); 
      
-    if (user_input =='1'){
+    if (user_input =='1')
+    {
        Stop();
     }
-    else if(user_input =='2'){
+    else if(user_input =='2')
+    {
       Forward();
     }
-    else if(user_input =='3'){
+    else if(user_input =='3')
+    {
       Reverse();
     }
-    else if(user_input =='+'){
+    else if(user_input =='+')
+    {
       IncreaseSpeed();
     }
-    else if(user_input =='-'){
+    else if(user_input =='-')
+    {
       DecreaseSpeed();
     }
-    else{
+    else
+    {
       Serial.println("Invalid option entered.");
     }
-  }
-  int is_go = get_distance();
-  if (is_go) {
-    Reverse();
-  }
-  else {
-    Rotate_Left();
-    delay(1000);
+      
   }
 
+// Serial.print("xung1="); Serial.print(xung1);
+// Serial.print("--");
+// Serial.print("v1=");Serial.println(v1);
+// Serial.print("xung2="); Serial.print(xung2);
+// Serial.print("--");
+// Serial.print("v2=");Serial.println(v2);
+//Forward();
+// delay(1000);
+// Stop();
+// delay(1000);
+Reverse();
+// delay(1000);
+// Stop();
+// delay(1000);
+//Rotate_Right();
+// delay(1000);
+// Stop();
+// delay(1000);
+// Rotate_Left();
+// delay(1000);
+// Stop();
+// delay(1000);
+// Half_Right();
+// delay(1000);
+// Stop();
+// delay(1000);
+// Half_Left();
+// delay(1000);
+// Stop();
+// delay(1000);
 }
 void ngat_dem_xung1(){
   xung1++;
@@ -244,7 +283,7 @@ void motorGo(uint8_t motor, uint8_t direct, uint8_t pwm)         //Function that
     else if(direct == CCW)
     {
       digitalWrite(MOTOR_A2_PIN, HIGH);
-      digitalWrite(MOTOR_B2_PIN, LOW);
+      digitalWrite(MOTOR_B2_PIN, LOW);      
     }
     else
     {
@@ -254,28 +293,4 @@ void motorGo(uint8_t motor, uint8_t direct, uint8_t pwm)         //Function that
     
     analogWrite(PWM_MOTOR_2, pwm);
   }
-}
-
-int get_distance() {
-    unsigned long duration; // biến đo thời gian
-    int distance;           // biến lưu khoảng cách
-    
-    /* Phát xung từ chân trig */
-    digitalWrite(trig,0);   // tắt chân trig
-    delayMicroseconds(2);
-    digitalWrite(trig,1);   // phát xung từ chân trig
-    delayMicroseconds(5);   // xung có độ dài 5 microSeconds
-    digitalWrite(trig,0);   // tắt chân trig
-    
-    /* Tính toán thời gian */
-    // Đo độ rộng xung HIGH ở chân echo. 
-    duration = pulseIn(echo,HIGH);  
-    // Tính khoảng cách đến vật.
-    distance = int(duration/2/29.412);
-    if (distance < 10) {
-      return 0;
-    }
-    else {
-      return 1;
-    }
 }
