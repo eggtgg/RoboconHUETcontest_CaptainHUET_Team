@@ -24,7 +24,7 @@ int positionX = 0;
 int positionY = 0;
 int positionZ = 0;
 
-int pulsestep = 40;
+int pulsestep = 50;
 int numstep = 3200;
 
 int step_X = 54;
@@ -40,7 +40,9 @@ int ena_Z = 62;
 int motorX;
 int motorY;
 int motorZ;
+
 int servo4;
+int servo5;
 
 int smode;
 
@@ -66,6 +68,8 @@ bool switch1;
 bool switch2;
 bool switchAB;
 
+int speed_motor_X = 1500;
+
 int enPinState = 0;
 int lastButtonRState = 0;
 int buttonRState = 0;
@@ -90,9 +94,10 @@ void setup() {
   pinMode(dirPin2, OUTPUT);
   pinMode(dirPin3, OUTPUT);
   pinMode(dirPin4, OUTPUT);
+  pinMode(6, OUTPUT);
 
-  servo_red.attach(5);
-  servo_green.attach(6);
+  servo_red.attach(6);
+  servo_green.attach(5);
 
   pinMode(end_X, INPUT_PULLUP);
   pinMode(end_Y, INPUT_PULLUP);
@@ -116,7 +121,11 @@ void setup() {
   Step_Z.setMaxSpeed(v_arm);
   Step_Z.setAcceleration(a_arm);
 
-  home_one();
+  Step_X.enableOutputs();
+  Step_Y.enableOutputs();
+  Step_Z.enableOutputs();
+
+  // home_one();
 
   Serial.begin(115200);
 
@@ -133,12 +142,18 @@ void setup() {
 
 void loop() {
   radio_check();
-  check_to_stop_arm();
+  // check_to_stop_arm();
   // run(95, potX, potY, potZ);
   
-  if (potX > 512) smode = 1;
+  if (switch2 == 0) smode = 1;
   else smode = 0;
   
+  if (potX > 512) {
+    speed_motor_X = 1800;
+  }
+  else {
+    speed_motor_X = 500;
+  }
   if (potY > 512) {
     servo4 = 10;
     servo_red.write(servo4);
@@ -146,6 +161,15 @@ void loop() {
   else {
     servo4 = 95;
     servo_red.write(servo4);
+  }
+
+  if (potZ > 512) {
+    servo5 = 95;
+    servo_green.write(servo5);
+  }
+  else {
+    servo5 = 95;
+    servo_green.write(servo5);
   }
 
   switch (smode) {
@@ -158,29 +182,28 @@ void loop() {
 
       dieu_chinh_arm();
       
-      if (!leftJoySw) {
-        positionX = Step_X.currentPosition();
-        Serial.print("set: "); Serial.print(positionX); Serial.println(";");
-        positionY = Step_Y.currentPosition();
-        positionZ = Step_Z.currentPosition();
-      }
+      // if (!leftJoySw) {
+      //   positionX = Step_X.currentPosition();
+      //   Serial.print("set: "); Serial.print(positionX); Serial.println(";");
+      //   positionY = Step_Y.currentPosition();
+      //   positionZ = Step_Z.currentPosition();
+      // }
 
-      if (!rightJoySw) {
-        Serial.print("hien tai: "); Serial.print(Step_X.currentPosition()); Serial.println(";");
-        // Serial.print("go to: "); Serial.print(positionX); Serial.println(";");
-        Step_X.setMaxSpeed(v_arm);
-        Step_X.setAcceleration(a_arm);
+      // if (!rightJoySw) {
+      //   Serial.print("hien tai: "); Serial.print(Step_X.currentPosition()); Serial.println(";");
+      //   // Serial.print("go to: "); Serial.print(positionX); Serial.println(";");
+      //   Step_X.setMaxSpeed(v_arm);
+      //   Step_X.setAcceleration(a_arm);
 
-        Step_Y.setMaxSpeed(v_arm);
-        Step_Y.setAcceleration(a_arm);
+      //   Step_Y.setMaxSpeed(v_arm);
+      //   Step_Y.setAcceleration(a_arm);
 
-        Step_Z.setMaxSpeed(v_arm);
-        Step_Z.setAcceleration(a_arm);
-        run(95, -500, 0, 0);
-      }
+      //   Step_Z.setMaxSpeed(v_arm);
+      //   Step_Z.setAcceleration(a_arm);
+      //   run(95, -500, 0, 0);
+      // }
       break;
   }
-  check_arm_and_run_mode();
 }
 
 
@@ -189,17 +212,17 @@ void radio_check() {
   if (radio.available()) {
     radio.read(&control, sizeof(control));
     rightJoyX = control[0];
-    // rightJoyY = control[1];
+    potX = control[1];
     rightJoySw = control[2];
 
     leftJoyX = control[3];
     leftJoyY = control[4];            
-    leftJoySw = control[5];
+    // pulsestep = control[5];
 
-    potX = control[6];
+    switch2 = control[6];
     potY = control[7];
     // Serial.print("hello");Serial.println(potY);
-    potZ = control[1];
+    potZ = control[5];
 
     // Serial.print(leftJoyX);
     // Serial.print("-");
@@ -315,11 +338,11 @@ void home_one() {
 void dieu_chinh_arm() {
   // MOTOR X
   if (rightJoyX > 723) {
-    Step_X.setSpeed(1000);
+    Step_X.setSpeed(speed_motor_X);
     Step_X.runSpeed();
   }
   else if (rightJoyX < 300) {
-    Step_X.setSpeed(-1000);
+    Step_X.setSpeed(-speed_motor_X);
     Step_X.runSpeed();
   }
   else {

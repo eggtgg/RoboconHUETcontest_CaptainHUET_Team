@@ -577,4 +577,4 @@ void motorGo(uint8_t motor, uint8_t direct, uint8_t pwm)         //Function that
     analogWrite(PWM_MOTOR_2, pwm);
   }
 }
->>>>>>> cab1aa0d2bbaaceba4b89e24472d2836836dc874
+
