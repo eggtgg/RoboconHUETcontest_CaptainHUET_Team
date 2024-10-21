@@ -13,6 +13,9 @@
 #define dirPin3 15
 #define dirPin4 19
 
+#define ledBlue 58
+#define ledRed 57
+
 #define v_arm 2000
 #define a_arm 1000
 
@@ -24,7 +27,7 @@ int positionX = 0;
 int positionY = 0;
 int positionZ = 0;
 
-int pulsestep = 50;
+int pulsestep = 60;
 int numstep = 3200;
 
 int step_X = 54;
@@ -45,6 +48,11 @@ int servo4;
 int servo5;
 
 int smode;
+
+unsigned long timeLed = 0;
+unsigned long timeCyc = 0;
+
+bool blink_mode = 0;
 
 int d_range_arm = 250;
 int d_range_move = 50;
@@ -98,6 +106,9 @@ void setup() {
 
   servo_red.attach(6);
   servo_green.attach(5);
+
+  pinMode(ledBlue, OUTPUT);
+  pinMode(ledRed, OUTPUT);
 
   pinMode(end_X, INPUT_PULLUP);
   pinMode(end_Y, INPUT_PULLUP);
@@ -164,12 +175,35 @@ void loop() {
   }
 
   if (potZ > 512) {
-    servo5 = 95;
+    servo5 = 10;
     servo_green.write(servo5);
   }
   else {
     servo5 = 95;
     servo_green.write(servo5);
+  }
+
+  if (!enPinState) {
+    if ((unsigned long) (millis() - timeCyc) > 400) {
+      blink_mode = !blink_mode;
+      timeCyc = millis();
+    }
+
+    if ((unsigned long) (millis() - timeLed) > 100)
+    {
+      switch (blink_mode) {
+        case 0:
+          digitalWrite(ledBlue, !(digitalRead(ledBlue)));
+          digitalWrite(ledRed, LOW);
+          timeLed = millis();
+          break;
+        case 1:
+          digitalWrite(ledBlue, LOW);
+          digitalWrite(ledRed, !(digitalRead(ledRed)));
+          timeLed = millis();
+          break;
+      }
+    }
   }
 
   switch (smode) {

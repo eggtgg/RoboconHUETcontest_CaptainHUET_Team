@@ -142,12 +142,11 @@ void loop() {
 }
 
 void thang() {
-  int target = 30;
-  float u1 = pidController1(target, kp, kd, ki);
-  float u2 = pidController2(target, kp, kd, ki);
+  int target1 = 10;
+  int target2 = 10;
+  float u1 = pidController1(target1, kp, kd, ki);
+  float u2 = pidController2(target2, kp, kd, ki);
   // Serial.print("cc");
-  moveMotor(CW, 5, u1);
-  moveMotor(CW, 6, u1);
 }
 
 void handleEncoder1() {
@@ -156,33 +155,14 @@ void handleEncoder1() {
 void handleEncoder2() {
     encoder2Count++;
 }
-void moveMotor1(int dirPin, int pwmPin, float u){
-  float speed = fabs(u);
-  if(speed > 255){
-    speed = 255;
-  }
-    if(dirPin == CW)
-    {
-      digitalWrite(MOTOR_A2_PIN, LOW);
-      digitalWrite(MOTOR_B2_PIN, HIGH);
-    }
-    else if(dirPin == CCW)
-    {
-      digitalWrite(MOTOR_A2_PIN, HIGH);
-      digitalWrite(MOTOR_B2_PIN, LOW);      
-    }
-    else
-    {
-      digitalWrite(MOTOR_A2_PIN, LOW);
-      digitalWrite(MOTOR_B2_PIN, LOW);            
-    }
-  analogWrite(pwmPin, speed);
-}
 
 void moveMotor2(int dirPin, int pwmPin, float u){
   float speed = fabs(u);
   if(speed > 255){
     speed = 255;
+  }
+  if(speed <= 0){
+    speed = 0;
   }
     if(dirPin == CW)
     {

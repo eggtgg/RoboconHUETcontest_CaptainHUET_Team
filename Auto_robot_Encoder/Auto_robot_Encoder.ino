@@ -326,7 +326,7 @@ void trai_90() {
   motorGo(MOTOR_2, CCW, 0);
   encoder1Count=0;
   encoder2Count=0;
-  delay(300);
+  delay(50);
   int target = encoder1Count;
   // 890
   while (target <= 850) {
@@ -338,14 +338,14 @@ void trai_90() {
   }
   motorGo(MOTOR_1, CCW, 0);
   motorGo(MOTOR_2, CW, 0);
-  delay(300);
+  delay(50);
 }
 void trai_15() {
   motorGo(MOTOR_1, CCW, 0);
   motorGo(MOTOR_2, CCW, 0);
   encoder1Count=0;
   encoder2Count=0;
-  delay(150);
+  delay(10);
   int target = encoder1Count;
   while (target <= 150) {
     motorGo(MOTOR_1, CW, 50);
@@ -356,7 +356,7 @@ void trai_15() {
   }
   motorGo(MOTOR_1, CCW, 0);
   motorGo(MOTOR_2, CW, 0);
-  delay(150);
+  delay(10);
 }
 
 void phai_90() {
@@ -365,7 +365,7 @@ void phai_90() {
   encoder1Count=0;
   encoder2Count=0;
   int target = encoder1Count;
-  delay(300);
+  delay(50);
   // 920
   while (target <= 850) {
     motorGo(MOTOR_1, CCW, 50);
@@ -376,7 +376,7 @@ void phai_90() {
   }
   motorGo(MOTOR_1, CW, 0);
   motorGo(MOTOR_2, CCW, 0);
-  delay(300);
+  delay(50);
 }
 
 void phai_15() {
@@ -385,7 +385,7 @@ void phai_15() {
   encoder1Count=0;
   encoder2Count=0;
   int target = encoder1Count;
-  delay(150);
+  delay(10);
   while (target <= 150) {
     motorGo(MOTOR_1, CCW, 50);
     float u = pidController(target, kp, kd, ki);
@@ -395,7 +395,7 @@ void phai_15() {
   }
   motorGo(MOTOR_1, CW, 0);
   motorGo(MOTOR_2, CCW, 0);
-  delay(150);
+  delay(10);
 }
 
 void handleEncoder1() {
